@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>보스를 잡아라 — 운석 피하기 3D (개선판)</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="hud">
+  <div id="score"><small>SCORE</small><span id="scoreVal">0</span></div>
+
+  <div id="timer">
+    <small id="timerLabel">BOSS IN</small>
+    <span id="timerVal">30</span>
+    <div id="timebar"><i id="timefill"></i></div>
+  </div>
+
+  <div id="missile">
+    <small>MISSILE <span id="mlvlNum">LV.1</span></small>
+    <div id="mlvl"></div>
+  </div>
+
+  <div id="lives"></div>
+  <div id="phaseTag">STAGE 1 · SURVIVE</div>
+  <div id="muteBtn">🔊</div>
+
+  <div id="bossbar" class="hide">
+    <div class="row"><span>BOSS</span><span id="bosshp">2200</span><span id="bosspips"></span></div>
+    <div class="track"><i id="bossfill"></i></div>
+  </div>
+</div>
+
+<!-- 보스 등장 경보 (붉은 띠 + 깜빡이는 글자) -->
+<div id="bossAlert" class="hide">
+  <div class="bands"></div>
+  <div class="alertInner">
+    <div class="lbl">⚠ WARNING ⚠</div>
+    <div class="big">BOSS APPROACHING</div>
+    <div class="sub">운석이 멈춥니다 — 보스가 직접 쏩니다</div>
+  </div>
+</div>
+
+<div id="danger"></div>
+<div id="flash"></div>
+
+<div class="overlay" id="startScreen">
+  <div class="card">
+    <div class="kicker">개선판 · three.js</div>
+    <h1>보스를 <span>잡아라</span></h1>
+    <div class="rule">
+      ① <b>30초</b> 동안 운석을 피하며 <b>아이템</b>을 모읍니다<br>
+      ② 30초 뒤 <b>보스</b> 등장 — 운석 대신 <b>보스가 미사일을 쏩니다</b><br>
+      ③ <b>3페이즈</b> — 페이즈가 오를수록 미사일이 <b>빨라집니다</b><br>
+      ④ 보스 HP를 0으로 만들면 <b>MISSION CLEAR</b><br>
+      <span class="dim">← → 이동 · M 소리 켜기/끄기 · 아이템: 노랑=강화 / 초록=목숨 / 하늘=연사</span>
+    </div>
+    <div class="cta" id="startBtn">스페이스로 시작</div>
+  </div>
+</div>
+
+<div class="overlay hide" id="overScreen">
+  <div class="card">
+    <div class="kicker">GAME OVER</div>
+    <h1>보스에게 졌습니다</h1>
+    <div class="stats">
+      <div>점수<b id="finalScore">0</b></div>
+      <div>피한 탄 · 운석<b id="finalDodged">0</b></div>
+      <div>버틴 시간<b id="finalTime">0초</b></div>
+    </div>
+    <div class="cta" id="retryBtn">다시 도전 (스페이스)</div>
+  </div>
+</div>
+
+<div class="overlay hide" id="clearScreen">
+  <div class="card clear">
+    <div class="kicker">MISSION CLEAR</div>
+    <h1>보스를 <span>물리쳤습니다</span></h1>
+    <div class="stats">
+      <div>점수<b id="clearScore">0</b></div>
+      <div>미사일<b id="clearLvl">LV.1</b></div>
+      <div>클리어 시간<b id="clearTime">0초</b></div>
+    </div>
+    <div class="cta" id="clearBtn">한 번 더 (스페이스)</div>
+  </div>
+</div>
+
+<div id="err"></div>
+
+<script src="lib/three.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/starfield.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/player.js"></script>
+<script src="js/items.js"></script>
+<script src="js/missiles.js"></script>
+<script src="js/asteroids.js"></script>
+<script src="js/bossfire.js"></script>
+<script src="js/boss.js"></script>
+<script src="js/hud.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

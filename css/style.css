@@ -1,0 +1,108 @@
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; overflow:hidden; background:#0B0A12;
+             font-family: -apple-system, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; }
+canvas { display:block; }
+
+/* ── HUD ── */
+#hud { position:fixed; inset:0; pointer-events:none; color:#FBF8EF; }
+#score { position:absolute; left:26px; top:20px; font-size:26px; font-weight:800;
+         font-variant-numeric:tabular-nums; letter-spacing:1px; }
+#score small { display:block; font-size:11px; font-weight:700; opacity:.55; letter-spacing:2px; }
+
+#timer { position:absolute; left:26px; top:96px; }
+#timer small { display:block; font-size:11px; font-weight:700; opacity:.55; letter-spacing:2px; }
+#timer span { font-size:24px; font-weight:800; font-variant-numeric:tabular-nums; }
+#timebar { width:150px; height:8px; border:2px solid #FBF8EF; margin-top:4px; }
+#timebar > i { display:block; height:100%; width:0%; background:#FFD23F; transition:width .1s; }
+
+#missile { position:absolute; right:26px; top:76px; text-align:right; }
+#missile small { font-size:11px; font-weight:700; letter-spacing:2px; opacity:.7; }
+#mlvl { display:flex; gap:4px; justify-content:flex-end; margin-top:5px; }
+#mlvl i { width:14px; height:14px; border:2px solid #FBF8EF; }
+#mlvl i.on { background:#FFD23F; }
+
+#lives { position:absolute; right:26px; top:22px; display:flex; gap:8px; }
+.heart { width:18px; height:18px; background:#FF5C8A; clip-path:polygon(0 30%,30% 30%,30% 0,70% 0,70% 30%,100% 30%,100% 70%,70% 70%,70% 100%,30% 100%,30% 70%,0 70%); }
+.heart.off { background:#3A3546; }
+
+#phaseTag { position:absolute; left:26px; bottom:22px; font-size:13px; font-weight:800;
+            letter-spacing:2px; opacity:.65; transition:all .18s; }
+#phaseTag.pop { color:#FFD23F; opacity:1; font-size:18px; text-shadow:0 0 16px rgba(255,210,63,.7); }
+
+#muteBtn { position:absolute; right:26px; bottom:22px; font-size:20px; pointer-events:auto;
+           cursor:pointer; width:40px; height:40px; display:flex; align-items:center;
+           justify-content:center; border:3px solid #FBF8EF; background:#14121E; }
+
+/* ── 위험 표시 (목숨 1개) ── */
+#danger { position:fixed; inset:0; z-index:5; pointer-events:none; opacity:0; transition:opacity .5s;
+          box-shadow:inset 0 0 160px 20px rgba(255,92,138,.55); }
+#danger.on { opacity:1; animation:dangerPulse 1.5s ease-in-out infinite; }
+@keyframes dangerPulse { 0%,100% { opacity:.35; } 50% { opacity:1; } }
+
+/* ── 붉은 섬광 (피격 · 페이즈 전환) ── */
+#flash { position:fixed; inset:0; z-index:6; pointer-events:none; opacity:0;
+         background:radial-gradient(circle at 50% 60%, rgba(255,92,138,.55), rgba(255,92,138,0) 70%); }
+
+
+/* ── 보스 HP ── */
+#bossbar { position:absolute; left:50%; top:22px; transform:translateX(-50%);
+           width:min(620px, 54vw); }
+#bossbar.hide { display:none; }
+#bossbar .row { display:flex; align-items:center; gap:10px; font-size:12px;
+                font-weight:800; letter-spacing:2px; margin-bottom:5px; }
+#bossbar .row #bosshp { font-variant-numeric:tabular-nums; color:#FFD23F; }
+#bosspips { margin-left:auto; display:flex; gap:4px; }
+#bosspips b { width:16px; height:16px; border:2px solid #FBF8EF; font-size:9px;
+              display:flex; align-items:center; justify-content:center; opacity:.45; }
+#bosspips b.on { background:#FF5C8A; opacity:1; }
+#bossbar .track { height:16px; border:3px solid #FBF8EF; }
+#bossbar .track i { display:block; height:100%; width:100%; background:#FF5C8A;
+                    transition:width .12s linear; }
+
+/* ── 보스 등장 경보 ── */
+#bossAlert { position:fixed; inset:0; z-index:7; pointer-events:none; display:flex;
+             align-items:center; justify-content:center; }
+#bossAlert.hide { display:none; }
+#bossAlert .bands { position:absolute; inset:-10%;
+             background:repeating-linear-gradient(115deg,
+               rgba(255,92,138,.22) 0 34px, rgba(255,92,138,0) 34px 96px);
+             animation:bandMove .45s linear infinite; }
+@keyframes bandMove { from { transform:translateX(0); } to { transform:translateX(-96px); } }
+
+#bossAlert .alertInner { position:relative; text-align:center; transform:skewY(-3deg);
+             animation:alertIn .5s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes alertIn { from { opacity:0; transform:skewY(-3deg) scale(.6); }
+                     to   { opacity:1; transform:skewY(-3deg) scale(1); } }
+#bossAlert .lbl { font-size:20px; font-weight:900; letter-spacing:12px; color:#FF5C8A;
+             animation:blink .38s steps(2) infinite; }
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:.15; } }
+#bossAlert .big { font-size:clamp(34px, 6vw, 82px); font-weight:900; letter-spacing:4px;
+             color:#FBF8EF; text-shadow:0 0 30px rgba(255,92,138,.85), 6px 6px 0 rgba(255,92,138,.5);
+             line-height:1.02; margin:6px 0 10px; }
+#bossAlert .sub { display:inline-block; font-size:clamp(13px,1.5vw,19px); font-weight:800;
+             color:#0B0A12; background:#FFD23F; padding:7px 16px; letter-spacing:1px; }
+
+/* ── 오버레이 ── */
+.overlay { position:fixed; inset:0; z-index:10; display:flex; flex-direction:column;
+           align-items:center; justify-content:center; text-align:center;
+           background:rgba(11,10,18,.86); color:#FBF8EF; }
+.overlay.hide { display:none; }
+.card { border:4px solid #FBF8EF; background:#14121E; padding:34px 46px 30px; max-width:680px; }
+.card.clear { border-color:#FFD23F; }
+.kicker { font-size:12px; letter-spacing:4px; color:#3CC7E0; font-weight:800; margin-bottom:12px; }
+.clear .kicker { color:#FFD23F; }
+h1 { font-size:38px; line-height:1.12; margin-bottom:8px; letter-spacing:-1px; }
+h1 span { color:#3CC7E0; }
+.clear h1 span { color:#FFD23F; }
+.rule { font-size:15.5px; line-height:1.95; color:#CFC9BA; margin:16px 0 20px; }
+.rule b { color:#FFD23F; }
+.rule .dim { font-size:13px; opacity:.6; }
+.cta { display:inline-block; background:#3CC7E0; color:#0B0A12; font-weight:900;
+       padding:12px 30px; font-size:17px; letter-spacing:1px;
+       border:4px solid #FBF8EF; box-shadow:6px 6px 0 rgba(251,248,239,.22); }
+.clear .cta { background:#FFD23F; }
+.stats { display:flex; gap:34px; justify-content:center; margin:18px 0 22px; }
+.stats div { font-size:13px; letter-spacing:1px; opacity:.7; }
+.stats b { display:block; font-size:26px; color:#FBF8EF; opacity:1; }
+#err { position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center;
+       color:#FF5C8A; font-size:15px; text-align:center; padding:40px; line-height:1.8; }
