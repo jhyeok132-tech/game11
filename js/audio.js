@@ -101,6 +101,22 @@ VG.SND = (function () {
     tone({ f0: 180 + p * 40, f1: 640 + p * 90, dur: 0.30, type: 'triangle', vol: 0.075 });
   };
 
+  S.shield = function () {                      // 방어막 켜는 소리
+    tone({ f0: 320, f1: 700, dur: 0.16, type: 'sine', vol: 0.10 });
+    noise({ dur: 0.10, f0: 1800, f1: 3200, vol: 0.035 });
+  };
+
+  S.slam = function () {                        // 다리가 내리치는 소리
+    tone({ f0: 150, f1: 45, dur: 0.30, type: 'sawtooth', vol: 0.13 });
+    noise({ dur: 0.24, f0: 900, f1: 120, vol: 0.10 });
+  };
+
+  S.block = function () {                       // 방어 성공 (금속성 '팽')
+    tone({ f0: 1180, f1: 1180, dur: 0.12, type: 'square', vol: 0.09 });
+    tone({ f0: 1760, dur: 0.22, type: 'triangle', vol: 0.07, when: 0.03 });
+    noise({ dur: 0.14, f0: 4200, f1: 2200, vol: 0.05 });
+  };
+
   S.alarm = function () {                       // 보스 등장 경보 (2.4초)
     for (var i = 0; i < 4; i++) {
       tone({ f0: 880, dur: 0.20, type: 'square', vol: 0.11, when: i * 0.60 });

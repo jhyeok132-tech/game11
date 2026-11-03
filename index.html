@@ -26,6 +26,15 @@
   <div id="phaseTag">STAGE 1 · SURVIVE</div>
   <div id="muteBtn">🔊</div>
 
+  <!-- 방어막 게이지 (스페이스바) -->
+  <div id="shieldHud">
+    <small>SHIELD · SPACE</small>
+    <div id="shBar"><i id="shFill"></i></div>
+    <span id="shTxt">READY</span>
+  </div>
+
+  <div id="fxText"></div>
+
   <div id="bossbar" class="hide">
     <div class="row"><span>BOSS</span><span id="bosshp">2200</span><span id="bosspips"></span></div>
     <div class="track"><i id="bossfill"></i></div>
@@ -38,7 +47,7 @@
   <div class="alertInner">
     <div class="lbl">⚠ WARNING ⚠</div>
     <div class="big">BOSS APPROACHING</div>
-    <div class="sub">운석이 멈춥니다 — 보스가 직접 쏩니다</div>
+    <div class="sub">문어 보스 등장 — 다리가 내려옵니다. 스페이스바로 막으세요</div>
   </div>
 </div>
 
@@ -48,13 +57,13 @@
 <div class="overlay" id="startScreen">
   <div class="card">
     <div class="kicker">개선판 · three.js</div>
-    <h1>보스를 <span>잡아라</span></h1>
+    <h1>문어 보스를 <span>잡아라</span></h1>
     <div class="rule">
       ① <b>30초</b> 동안 운석을 피하며 <b>아이템</b>을 모읍니다<br>
-      ② 30초 뒤 <b>보스</b> 등장 — 운석 대신 <b>보스가 미사일을 쏩니다</b><br>
-      ③ <b>3페이즈</b> — 페이즈가 오를수록 미사일이 <b>빨라집니다</b><br>
-      ④ 보스 HP를 0으로 만들면 <b>MISSION CLEAR</b><br>
-      <span class="dim">← → 이동 · M 소리 켜기/끄기 · 아이템: 노랑=강화 / 초록=목숨 / 하늘=연사</span>
+      ② 30초 뒤 <b>문어 보스</b> 등장 — <b>8개의 다리</b>로 내리칩니다<br>
+      ③ 바닥에 <b>표식</b>이 뜨면 <b>스페이스바</b>로 방어막! 타이밍이 전부입니다<br>
+      ④ 막을 때마다 보스가 <b>데미지</b>를 입습니다 — HP를 0으로 만들면 <b>MISSION CLEAR</b><br>
+      <span class="dim">← → 이동 · SPACE 방어막 · M 소리 · 아이템: 노랑=강화 / 초록=목숨 / 하늘=연사</span>
     </div>
     <div class="cta" id="startBtn">스페이스로 시작</div>
   </div>
@@ -99,6 +108,7 @@
 <script src="js/asteroids.js"></script>
 <script src="js/bossfire.js"></script>
 <script src="js/boss.js"></script>
+<script src="js/shield.js"></script>
 <script src="js/hud.js"></script>
 <script src="js/main.js"></script>
 </body>

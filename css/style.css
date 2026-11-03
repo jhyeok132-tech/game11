@@ -22,6 +22,26 @@ canvas { display:block; }
 #mlvl i.on { background:#FFD23F; }
 
 #lives { position:absolute; right:26px; top:22px; display:flex; gap:8px; }
+
+/* ── 방어막 게이지 (스페이스바) ── */
+#shieldHud { position:absolute; right:26px; bottom:22px; text-align:right; }
+#shieldHud small { display:block; font-size:11px; font-weight:700; letter-spacing:2px; opacity:.7; }
+#shBar { width:120px; height:10px; border:2px solid #FBF8EF; margin:5px 0 4px auto; }
+#shBar > i { display:block; height:100%; width:100%; background:#3CC7E0; transition:width .06s linear; }
+#shieldHud span { font-size:12px; font-weight:800; letter-spacing:1px; color:#3CC7E0; }
+#shieldHud.cool span { color:#8A8399; }
+
+/* ── 판정 문구 (BLOCK! / DODGE) ── */
+#fxText { position:absolute; left:50%; top:38%; transform:translate(-50%,-50%) scale(.8);
+          font-size:44px; font-weight:900; letter-spacing:4px; opacity:0;
+          text-shadow:0 0 22px currentColor; }
+#fxText.show { animation:fxPop .62s ease-out; }
+@keyframes fxPop {
+  0%   { opacity:0; transform:translate(-50%,-50%) scale(.7); }
+  22%  { opacity:1; transform:translate(-50%,-50%) scale(1.12); }
+  70%  { opacity:1; transform:translate(-50%,-50%) scale(1); }
+  100% { opacity:0; transform:translate(-50%,-56%) scale(1); }
+}
 .heart { width:18px; height:18px; background:#FF5C8A; clip-path:polygon(0 30%,30% 30%,30% 0,70% 0,70% 30%,100% 30%,100% 70%,70% 70%,70% 100%,30% 100%,30% 70%,0 70%); }
 .heart.off { background:#3A3546; }
 

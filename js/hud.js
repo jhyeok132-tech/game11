@@ -26,6 +26,19 @@ VG.updateHud = function () {
   const G = VG.G;
   VG.$('scoreVal').textContent = G.score;
 
+  // 방어막 게이지
+  const sh = VG.$('shBar'), shTxt = VG.$('shTxt'), shHud = VG.$('shieldHud');
+  if (sh && shTxt) {
+    const total = VG.CFG.shield.dur + VG.CFG.shield.cd;
+    const ready = VG.shieldCd <= 0;
+    const pct = VG.shieldActive > 0 ? 100
+              : ready ? 100
+              : Math.max(0, 100 - (VG.shieldCd / total) * 100);
+    sh.firstChild.style.width = pct.toFixed(0) + '%';
+    shTxt.textContent = VG.shieldActive > 0 ? 'ON' : (ready ? 'READY' : 'WAIT');
+    if (shHud) shHud.classList.toggle('cool', !ready);
+  }
+
   if (G.phase === 'survive') {
     VG.$('timerLabel').textContent = 'BOSS IN';
     VG.$('timerVal').textContent = Math.max(0, Math.ceil(G.surviveLeft));

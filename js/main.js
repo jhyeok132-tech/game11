@@ -33,6 +33,7 @@ VG.init = function () {
   VG.buildFloor(scene);
   VG.player = VG.buildPlayer(scene);
   VG.buildBoss(scene);
+  VG.buildShield(scene);
   VG.clock = new THREE.Clock();
 
   addEventListener('resize', VG.onResize);
@@ -64,6 +65,9 @@ VG.start = function () {
   VG.clearMissiles(VG.scene);
   VG.clearBullets(VG.scene);
   VG.clearParts(VG.scene);
+  VG.clearOctopusAttack();
+  VG.shieldActive = 0; VG.shieldCd = 0; VG.blockCount = 0;
+  if (VG.shield) VG.shield.visible = false;
   VG.boss.visible = false;
   VG.drama = 0;
   VG.camBlend = 0;
@@ -171,6 +175,7 @@ VG.onKey = function (e) {
     e.preventDefault();
     VG.SND.init();
     if (VG.G.phase === 'ready' || VG.G.phase === 'over' || VG.G.phase === 'clear') VG.start();
+    else VG.tryShield();                 // 플레이 중: 방어막
   }
 };
 VG.onKeyUp = function (e) {
@@ -192,6 +197,7 @@ VG.step = function (dt) {
   VG.stars.rotation.z += dt * 0.01;
   VG.updateParts(VG.scene, dt);
   VG.updateFlashes(VG.scene, dt);
+  VG.updateSparks(dt);
 
   if (G.alertT > 0) {
     G.alertT -= dt;
@@ -210,14 +216,11 @@ VG.step = function (dt) {
     VG.player.visible = Math.floor(G.invuln * 12) % 2 === 0;
     if (G.invuln <= 0) VG.player.visible = true;
   }
-  if (VG.CINE) {
-    const wantLvl = Math.min(5, 1 + Math.floor(G.t / 7));
-    if (wantLvl > G.missileLvl) {
-      G.missileLvl = wantLvl; VG.syncGun(VG.player); VG.renderMissile();
-    }
-  }
-  if (VG.DEMO) VG.demo();
+  // ⚠️ 촬영 모드에서 미사일 LV를 시간으로 올리던 코드는 삭제했다.
+  //    (아이템을 안 먹어도 LV가 오르는 것처럼 보여 '개선'이 안 보였다)
+  if (VG.DEMO && G.phase === 'survive') VG.demo();   // 보스전은 촬영용 파일럿이 조종한다
   VG.movePlayer(VG.player, dt);
+  VG.updateShield(dt);
 
   // ── 1단계: 운석 피하기 ──────────────────────────────────────
   if (G.phase === 'survive') {
@@ -258,9 +261,9 @@ VG.step = function (dt) {
     VG.renderMissile();
   });
 
-  // ── 2단계: 보스전 ───────────────────────────────────────────
+  // ── 2단계: 문어 보스전 ──────────────────────────────────────
   if (G.phase === 'boss') {
-    const gap = VG.updateBoss(dt, G.t);
+    VG.updateBoss(dt, G.t);            // 다리 애니메이션 · 등장 연출
 
     // 내 미사일 자동 발사
     G.fireTimer -= dt;
@@ -274,26 +277,8 @@ VG.step = function (dt) {
     const dmg = VG.updateMissiles(VG.scene, dt, VG.boss);
     if (dmg > 0) VG.damageBoss(dmg);
 
-    // 보스 조준 → 발사
-    if (G.chargeTimer > 0) {
-      G.chargeTimer -= dt;
-      if (G.chargeTimer <= 0) {
-        VG.bossFire(VG.scene, VG.boss, VG.player);
-        G.bossFireTimer = gap;
-        G.chargeTimer = 0;
-      }
-    } else {
-      G.bossFireTimer -= dt;
-      if (G.bossFireTimer <= 0) {
-        G.chargeTimer = C.boss.shot.telegraph[G.bossPhase - 1];
-        VG.SND.play('charge', G.bossPhase);
-      }
-    }
-
-    // 보스 미사일 → 나
-    const rb = VG.updateBullets(VG.scene, dt, VG.player);
-    G.dodged += rb.dodged;
-    for (let i = 0; i < rb.hits; i++) VG.hit();
+    // 문어 다리 공격 (예고 → 내리치기) · 방어 판정은 shield 와 맞물린다
+    VG.updateOctopusAttack(dt);
 
     // 보스 몸통에 닿으면 큰 피해
     const bdx = Math.abs(VG.boss.position.x - VG.player.position.x);
@@ -344,6 +329,7 @@ VG.demo = function () {
   const LANE = VG.CFG.lanes * 0.96;
   const px = p.position.x, pz = p.position.z;
   const N = 28;
+  const xs = [], scs = [];
 
   let bestX = px, bestScore = -1e9;
 
@@ -375,22 +361,30 @@ VG.demo = function () {
       sc -= Math.max(0, 2.0 - d) * 18 / (0.3 + ttc);
     });
 
-    // 아이템은 안전할 때만
-    if (G.phase === 'survive') {
-      VG.items.forEach(function (it) {
-        const dz = it.position.z - pz;
-        if (dz > 3 && dz < 32) {
-          sc += 90 / (1 + Math.abs(it.position.x - x) * 0.6) / (1 + dz * 0.06);
-        }
-      });
-    } else if (VG.boss.visible) {
+    if (VG.boss && VG.boss.visible) {
       // 보스 몸통과 겹치지 않게, 화면 가운데에 머물지 않게
       if (Math.abs(VG.boss.position.x - x) < 3.2) sc -= 220;
       sc -= Math.abs(x) * 1.2;
     }
 
     sc -= Math.abs(x - px) * 0.30;      // 급격한 이동 억제
+    xs.push(x); scs.push(sc);
     if (sc > bestScore) { bestScore = sc; bestX = x; }
+  }
+
+  // 아이템: 그 레인이 '안전할 때만' 우선한다 (점수 가산만으로는 회피에 늘 밀렸다)
+  if (G.phase === 'survive' && VG.items.length && VG.G.lives > 1) {
+    let pick = null;
+    VG.items.forEach(function (it) {
+      const dz = it.position.z - pz;
+      if (dz > -2 || dz < -24) return;
+      let k = Math.round((it.position.x / LANE + 1) * 0.5 * N);
+      k = Math.max(0, Math.min(N, k));
+      if (scs[k] < -35) return;                    // 그 자리가 위험하면 포기
+      const d = Math.abs(it.position.x - px);
+      if (!pick || d < pick.d) pick = { d: d, tx: it.position.x };
+    });
+    if (pick) bestX = pick.tx;
   }
 
   VG.keys.left = px > bestX + 0.12;
